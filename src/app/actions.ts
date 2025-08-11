@@ -17,7 +17,6 @@ export type LivePrice = {
 
 type LivePricingConfig = {
     useLive: boolean;
-    liveBase: string;
 }
 
 const recommendationSchema = z.object({
@@ -28,15 +27,80 @@ const recommendationSchema = z.object({
   brand: z.enum(["any", "NVIDIA", "AMD"]),
 });
 
-// A placeholder for fetching live prices. In a real app, this would make a network request.
-async function fetchLiveFor(gpu: Gpu, config: LivePricingConfig): Promise<LivePrice | null> {
-    if (!config.useLive || !config.liveBase) return null;
+const ALLOWED_HOSTS = ['overclockers.co.uk','scan.co.uk','ebuyer.com','pricespy.co.uk'];
+
+function isAllowed(u: string): boolean {
+  try {
+    const h = new URL(u).hostname.replace(/^www\./, '');
+    return ALLOWED_HOSTS.some(x => h.endsWith(x));
+  } catch {
+    return false;
+  }
+}
+
+function extractPrice(u: string, html: string): number | null {
+  const host = new URL(u).hostname.replace(/^www\./, '');
+  // Domain-specific quick paths
+  if (host.endsWith('scan.co.uk')) {
+    const m1 = html.match(/itemprop=\"price\"[^>]*content=\"([0-9]+(?:\.[0-9]{2})?)\"/i);
+    if (m1) return Number(m1[1]);
+  }
+  if (host.endsWith('overclockers.co.uk')) {
+    const m = html.match(/data-product-price=\"([0-9]+(?:\.[0-9]{2})?)\"/i) || html.match(/\u00A3?([0-9]{2,4}(?:\.[0-9]{2})?)(?=<\/span>\s*<span[^>]*class=\"price\")/i);
+    if (m) return Number(m[1]);
+  }
+  if (host.endsWith('ebuyer.com')) {
+    const m = html.match(/itemprop=\"price\"[^>]*content=\"([0-9]+(?:\.[0-9]{2})?)\"/i);
+    if (m) return Number(m[1]);
+  }
+  if (host.endsWith('pricespy.co.uk')) {
+    const m = html.match(/Lowest price[^£]*£\s*([0-9]{2,4}(?:\.[0-9]{2})?)/i);
+    if (m) return Number(m[1]);
+  }
+  // Fallback: find all £ amounts and pick the smallest plausible GPU price
+  const re = /£\s*([0-9]{2,4}(?:,[0-9]{3})?(?:\.[0-9]{2})?)/g;
+  const vals: number[] = [];
+  let m;
+  while ((m = re.exec(html))) {
+    const v = Number(m[1].replace(/,/g, ''));
+    if (v >= 100 && v <= 4000) vals.push(v);
+  }
+  return vals.length ? Math.min(...vals) : null;
+}
+
+
+async function fetchOne(u: string): Promise<{ url: string; price: number | null; ok: boolean; error?: string }> {
+  if (!isAllowed(u)) return { url: u, price: null, ok: false, error: 'host not allowed' };
+  try {
+    const res = await fetch(u, { headers: { 'User-Agent': 'GPU-Recommender/1.0' } });
+    if (!res.ok) {
+        return {url: u, price: null, ok: false, error: `HTTP ${res.status}`};
+    }
+    const html = await res.text();
+    const price = extractPrice(u, html);
+    return { url: u, price, ok: typeof price === 'number' };
+  } catch(e) {
+      const error = e instanceof Error ? e.message : String(e);
+      return {url: u, price: null, ok: false, error};
+  }
+}
+
+
+async function fetchLiveFor(gpu: Gpu): Promise<LivePrice | null> {
     const urls = (gpu.retailers||[]).map(r=>r.url).filter(Boolean);
     if (!urls.length) return null;
-    // In a real app, you'd fetch this from your Cloudflare worker.
-    // For now, we'll simulate a delay and return null.
-    await new Promise(resolve => setTimeout(resolve, 50));
-    return null; 
+    
+    const results = await Promise.all(urls.map(u => fetchOne(u)));
+    const prices = results.map(r => r.price).filter((x): x is number => typeof x === 'number');
+    if (!prices.length) return null;
+
+    const bestPrice = Math.min(...prices);
+    const bestItem = results.find(r => r.price === bestPrice);
+
+    if (bestItem) {
+        return { price: bestItem.price!, source: bestItem.url };
+    }
+    return null;
 }
 
 
@@ -84,9 +148,9 @@ export async function getRecommendation(values: Omit<z.infer<typeof recommendati
     
     const data: Gpu[] = JSON.parse(JSON.stringify(gpuData));
 
-    if (liveConfig?.useLive && liveConfig.liveBase) {
+    if (liveConfig?.useLive) {
       const tasks = data.map(async g => {
-        const live = await fetchLiveFor(g, liveConfig);
+        const live = await fetchLiveFor(g);
         if (live && typeof live.price === 'number' && isFinite(live.price)) {
           g._live = live;
           g._price = live.price;

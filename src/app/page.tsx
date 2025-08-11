@@ -44,13 +44,10 @@ type FormData = z.infer<typeof formSchema>;
 export default function Home() {
   const [isPending, startTransition] = useTransition();
   const [results, setResults] = useState<Gpu[]>([]);
-  const [liveBase, setLiveBase] = useState("");
   const [useLive, setUseLive] = useState(false);
-  const [liveStatus, setLiveStatus] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
-    setLiveBase(localStorage.getItem('gpu_live_base') || '');
     setUseLive(localStorage.getItem('gpu_use_live') === '1');
     onSubmit(form.getValues());
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -69,7 +66,7 @@ export default function Home() {
 
   function onSubmit(values: FormData) {
     startTransition(async () => {
-      const recommendations = await getRecommendation(values, useLive && liveBase ? { useLive, liveBase } : undefined);
+      const recommendations = await getRecommendation(values, { useLive });
       if (recommendations.error) {
         toast({
           variant: "destructive",
@@ -105,19 +102,11 @@ export default function Home() {
     });
   };
 
-  const saveLiveConfig = () => {
-    localStorage.setItem('gpu_live_base', liveBase);
-    localStorage.setItem('gpu_use_live', useLive ? '1' : '0');
-    setLiveStatus('Saved live pricing settings.');
-  };
-
-  const testLiveConfig = async () => {
-    saveLiveConfig();
-    if (!useLive || !liveBase) return;
-    setLiveStatus('Testing...');
-    // This is a placeholder for the actual test logic
-    setTimeout(() => setLiveStatus("Test complete. Check console for details."), 1000);
-  };
+  const handleUseLiveChange = (checked: boolean) => {
+    setUseLive(checked);
+    localStorage.setItem('gpu_use_live', checked ? '1' : '0');
+    onSubmit(form.getValues());
+  }
 
   const getScoreBadge = (score: number = 0) => {
     if(score>=26) return {className:'good', text:'Great fit'};
@@ -126,8 +115,8 @@ export default function Home() {
     return {className:'bad', text:'Poor fit'};
   }
 
-  const liveDotColor = useLive && liveBase ? '#2fd36b' : useLive ? '#ffd166' : '#444';
-  const liveLabelText = useLive && liveBase ? 'live pricing enabled' : useLive ? 'live enabled but no Worker URL' : 'offline pricing';
+  const liveDotColor = useLive ? '#2fd36b' : '#444';
+  const liveLabelText = useLive ? 'live pricing enabled' : 'offline pricing';
 
   return (
     <>
@@ -138,7 +127,7 @@ export default function Home() {
             <Badge variant="secondary" className="text-xs font-normal">Last checked: {LAST_CHECKED}</Badge>
           </h1>
           <p className="text-xs text-muted-foreground">
-            Specs are embedded from UK retailer pages. Optional live pricing via your own tiny Cloudflare Worker (code included below). Data stays auditable.
+            Specs are embedded from UK retailer pages. Optional live pricing via the server. Data stays auditable.
           </p>
         </div>
       </header>
@@ -243,22 +232,13 @@ export default function Home() {
 
                 <Separator className="my-4" />
 
-                <div>
-                    <FormLabel className="text-xs">Live pricing (optional)</FormLabel>
-                    <Input placeholder="https://your-worker.workers.dev" value={liveBase} onChange={e => setLiveBase(e.target.value)} />
-                    <p className="text-xs text-muted-foreground mt-1">Paste your Cloudflare Worker URL. We’ll call <code className="font-mono text-xs">POST /batch</code> with retailer URLs per GPU, cache 6–12h.</p>
-                </div>
                 <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <Checkbox id="useLive" checked={useLive} onCheckedChange={(checked) => setUseLive(Boolean(checked))} />
+                      <Checkbox id="useLive" checked={useLive} onCheckedChange={(checked) => handleUseLiveChange(Boolean(checked))} />
                       <label htmlFor="useLive" className="text-sm">Use live prices when available</label>
                     </div>
-                    <div className="flex gap-2">
-                      <Button type="button" size="sm" onClick={saveLiveConfig}>Save</Button>
-                      <Button type="button" size="sm" onClick={testLiveConfig}>Test</Button>
-                    </div>
                 </div>
-                 <p className="text-xs text-muted-foreground">{liveStatus}</p>
+                 <p className="text-xs text-muted-foreground">Live prices are scraped from retailer sites on the server. This may be slow.</p>
 
               </form>
             </Form>
@@ -286,7 +266,7 @@ export default function Home() {
                                 <th className="text-left text-xs uppercase opacity-80 p-2">Power</th>
                                 <th className="text-left text-xs uppercase opacity-80 p-2">Price</th>
                                 <th className="text-left text-xs uppercase opacity-80 p-2">Fit score</th>
-                                <th className="text-left text-xs uppercase opacity-80 p-2">Why</th>
+                                <th className="text-left text-xs uppercase opacity-80 p-2">Notes</th>
                                 <th className="text-left text-xs uppercase opacity-80 p-2">Links</th>
                             </tr>
                         </thead>
@@ -352,56 +332,7 @@ export default function Home() {
                                     </div>
                                 ))}
                             </div>
-                            <p className="text-xs text-muted-foreground mt-2">If a price looks off, use the retailer link to verify — prices move daily. Live pricing uses your Worker with caching and polite frequency.</p>
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-2">
-                        <AccordionTrigger className="text-base">Deploy a live-pricing Cloudflare Worker (free tier)</AccordionTrigger>
-                        <AccordionContent>
-                            <div className="bg-muted/30 p-3 rounded-md space-y-2">
-                                <ol className="list-decimal list-inside text-sm space-y-1">
-                                    <li>Install <code className="font-mono text-xs">wrangler</code> and create a Worker: <code className="font-mono text-xs">npm create cloudflare@latest</code></li>
-                                    <li>Choose “Hello World” → paste this code into <code className="font-mono text-xs">src/index.js</code> and deploy (<code className="font-mono text-xs">npx wrangler deploy</code>).</li>
-                                    <li>Copy the URL (e.g., <code className="font-mono text-xs">https://your-worker.workers.dev</code>) into the box above and hit Save.</li>
-                                </ol>
-                                <pre className="text-xs font-mono bg-background p-2 rounded-md overflow-x-auto max-h-64">
-                                    {`// Cloudflare Worker: UK GPU live price fetcher (cache + CORS)
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    const headers = {
-      'content-type':'application/json; charset=utf-8',
-      'access-control-allow-origin':'*',
-      'access-control-allow-methods':'GET,POST,OPTIONS',
-      'access-control-allow-headers':'content-type'
-    };
-    if (request.method === 'OPTIONS') return new Response('', {headers});
-
-    if (url.pathname === '/price') {
-      const target = url.searchParams.get('url');
-      if (!target) return json({error:'missing url'}, 400, headers);
-      const out = await fetchOne(target);
-      return json(out, 200, headers, 21600);
-    }
-
-    if (url.pathname === '/batch' && request.method === 'POST') {
-      const body = await request.json().catch(()=>({urls:[]}));
-      const urls = Array.isArray(body.urls) ? body.urls.filter(isAllowed) : [];
-      const results = await Promise.all(urls.map(u=> fetchOne(u).catch(e=>({url:u,error:String(e)}))));
-      const prices = results.map(r=> r.price).filter(x=> typeof x==='number');
-      const best = prices.length ? Math.min(...prices) : null;
-      const bestItem = best!=null ? results.find(r=> r.price===best) : null;
-      return json({best:bestItem||null, items:results}, 200, headers, 21600);
-    }
-
-    return json({error:'Not found'}, 404, headers);
-  }
-};
-// ... (rest of the worker code)
-`}
-                                </pre>
-                                <p className="text-xs text-muted-foreground">This is deliberately conservative: allows a small set of UK hosts, caches for 6 hours, and scrapes only minimal price data. Check site terms if you plan to scale this up.</p>
-                            </div>
+                            <p className="text-xs text-muted-foreground mt-2">If a price looks off, use the retailer link to verify — prices move daily. Live pricing uses server-side scraping and may be slow.</p>
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
