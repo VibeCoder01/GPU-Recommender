@@ -152,7 +152,7 @@ export default function Home() {
           <CardContent>
             <Form {...form}>
               <form onChange={() => onSubmit(form.getValues())} className="space-y-4">
-                <div className="space-y-4 border border-border rounded-lg p-4">
+                <div className="space-y-4 border border-input rounded-lg p-4">
                   <FormField
                     control={form.control}
                     name="useCase"
@@ -219,7 +219,7 @@ export default function Home() {
                 
                 <div className="flex flex-wrap gap-2 pt-2">
                     {quickChips.map(chip => (
-                      <button key={chip.label} type="button" onClick={() => handleQuickChip(chip.set)} className="text-xs inline-flex items-center gap-2 bg-muted hover:bg-muted/80 border border-border rounded-full px-3 py-1.5">
+                      <button key={chip.label} type="button" onClick={() => handleQuickChip(chip.set)} className="text-xs inline-flex items-center gap-2 bg-muted hover:bg-muted/80 border border-input rounded-full px-3 py-1.5">
                          <span className="block w-2 h-2 rounded-full bg-accent"></span>
                          {chip.label}
                       </button>
