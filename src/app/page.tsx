@@ -152,67 +152,69 @@ export default function Home() {
           <CardContent>
             <Form {...form}>
               <form onChange={() => onSubmit(form.getValues())} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="useCase"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs">Primary use</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="gaming">Gaming</SelectItem>
-                          <SelectItem value="creator">Content creation / video</SelectItem>
-                          <SelectItem value="ai">AI / ML (CUDA-heavy)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-4 border border-border rounded-lg p-4">
+                  <FormField
+                    control={form.control}
+                    name="useCase"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Primary use</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="gaming">Gaming</SelectItem>
+                            <SelectItem value="creator">Content creation / video</SelectItem>
+                            <SelectItem value="ai">AI / ML (CUDA-heavy)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
 
-                <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="budget" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-xs">Budget (max, £)</FormLabel>
-                            <FormControl><Input type="number" step="10" {...field} /></FormControl>
-                        </FormItem>
-                    )}/>
-                    <FormField control={form.control} name="brand" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-xs">Brand preference</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                                <SelectContent>
-                                    <SelectItem value="any">Either / any</SelectItem>
-                                    <SelectItem value="NVIDIA">NVIDIA</SelectItem>
-                                    <SelectItem value="AMD">AMD</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </FormItem>
-                    )}/>
-                </div>
-                 <div className="text-xs text-muted-foreground -mt-2">We compare against a conservative “from £” price from UK listings (or your live price if enabled).</div>
+                  <div className="grid grid-cols-2 gap-4">
+                      <FormField control={form.control} name="budget" render={({ field }) => (
+                          <FormItem>
+                              <FormLabel className="text-xs">Budget (max, £)</FormLabel>
+                              <FormControl><Input type="number" step="10" {...field} /></FormControl>
+                          </FormItem>
+                      )}/>
+                      <FormField control={form.control} name="brand" render={({ field }) => (
+                          <FormItem>
+                              <FormLabel className="text-xs">Brand preference</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                  <SelectContent>
+                                      <SelectItem value="any">Either / any</SelectItem>
+                                      <SelectItem value="NVIDIA">NVIDIA</SelectItem>
+                                      <SelectItem value="AMD">AMD</SelectItem>
+                                  </SelectContent>
+                              </Select>
+                          </FormItem>
+                      )}/>
+                  </div>
+                  <div className="text-xs text-muted-foreground -mt-2 col-span-2">We compare against a conservative “from £” price from UK listings (or your live price if enabled).</div>
 
 
-                <div className="grid grid-cols-1 gap-4">
-                    <FormField control={form.control} name="vram" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-xs">Min VRAM (GB)</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                                <SelectContent>
-                                    <SelectItem value="0">No minimum</SelectItem>
-                                    <SelectItem value="8">8</SelectItem>
-                                    <SelectItem value="12">12</SelectItem>
-                                    <SelectItem value="16">16</SelectItem>
-                                    <SelectItem value="20">20</SelectItem>
-                                    <SelectItem value="24">24</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </FormItem>
-                    )}/>
+                  <div className="grid grid-cols-1 gap-4">
+                      <FormField control={form.control} name="vram" render={({ field }) => (
+                          <FormItem>
+                              <FormLabel className="text-xs">Min VRAM (GB)</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                  <SelectContent>
+                                      <SelectItem value="0">No minimum</SelectItem>
+                                      <SelectItem value="8">8</SelectItem>
+                                      <SelectItem value="12">12</SelectItem>
+                                      <SelectItem value="16">16</SelectItem>
+                                      <SelectItem value="20">20</SelectItem>
+                                      <SelectItem value="24">24</SelectItem>
+                                  </SelectContent>
+                              </Select>
+                          </FormItem>
+                      )}/>
+                  </div>
                 </div>
                 
                 <div className="flex flex-wrap gap-2 pt-2">
