@@ -40,10 +40,20 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+function formatTimestamp(isoString?: string) {
+  if (!isoString) return '';
+  return new Date(isoString).toLocaleString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+}
+
 export default function Home() {
   const [isPending, startTransition] = useTransition();
   const [results, setResults] = useState<Gpu[]>([]);
   const [useLive, setUseLive] = useState(false);
+  const [lastCheckedTimestamp, setLastCheckedTimestamp] = useState<string | undefined>();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -73,6 +83,7 @@ export default function Home() {
         });
       } else if (recommendations.data) {
         setResults(recommendations.data);
+        setLastCheckedTimestamp(recommendations.lastChecked);
       }
     });
   }
@@ -114,13 +125,18 @@ export default function Home() {
   const liveDotColor = useLive ? '#2fd36b' : '#444';
   const liveLabelText = useLive ? 'live pricing enabled' : 'offline pricing';
 
+  const headerLastChecked = useLive
+    ? (lastCheckedTimestamp ? `Live prices from ${formatTimestamp(lastCheckedTimestamp)}` : 'Fetching live prices...')
+    : `Prices from ${LAST_CHECKED}`;
+
+
   return (
     <>
       <header className="sticky top-0 z-10 bg-background/75 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <h1 className="text-xl font-bold tracking-wide flex items-center gap-4">
             GPU Recommender (UK)
-            <Badge variant="secondary" className="text-xs font-normal">Last checked: {LAST_CHECKED}</Badge>
+            <Badge variant="secondary" className="text-xs font-normal">{headerLastChecked}</Badge>
           </h1>
           <p className="text-xs text-muted-foreground">
             Specs are embedded from UK retailer pages. Optional live pricing via the server. Data stays auditable.

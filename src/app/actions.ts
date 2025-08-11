@@ -146,6 +146,7 @@ export async function getRecommendation(values: Omit<z.infer<typeof recommendati
     }
     
     const data: Gpu[] = JSON.parse(JSON.stringify(gpuData));
+    let lastChecked: string | undefined = undefined;
 
     if (liveConfig?.useLive) {
       const tasks = data.map(async g => {
@@ -156,6 +157,7 @@ export async function getRecommendation(values: Omit<z.infer<typeof recommendati
         }
       });
       await Promise.allSettled(tasks);
+      lastChecked = new Date().toISOString();
     }
     
     data.forEach(g => {
@@ -168,6 +170,7 @@ export async function getRecommendation(values: Omit<z.infer<typeof recommendati
     return {
       success: true,
       data: sorted,
+      lastChecked,
     };
   } catch (error) {
     console.error('Error in getRecommendation action:', error);
