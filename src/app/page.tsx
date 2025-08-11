@@ -126,7 +126,7 @@ export default function Home() {
   const liveLabelText = useLive ? 'live pricing enabled' : 'offline pricing';
 
   const headerLastChecked = useLive
-    ? (lastCheckedTimestamp ? `Live prices from ${formatTimestamp(lastCheckedTimestamp)}` : 'Fetching live prices...')
+    ? (isPending ? 'Fetching live prices...' : (lastCheckedTimestamp ? `Live prices from ${formatTimestamp(lastCheckedTimestamp)}` : 'Using embedded prices'))
     : `Prices from ${LAST_CHECKED}`;
 
 
@@ -219,7 +219,7 @@ export default function Home() {
                 
                 <div className="flex flex-wrap gap-2 pt-2">
                     {quickChips.map(chip => (
-                      <button key={chip.label} type="button" onClick={() => handleQuickChip(chip.set)} className="text-xs inline-flex items-center gap-2 bg-muted hover:bg-muted/80 border border-transparent rounded-full px-3 py-1.5">
+                      <button key={chip.label} type="button" onClick={() => handleQuickChip(chip.set)} className="text-xs inline-flex items-center gap-2 bg-muted hover:bg-muted/80 border border-input rounded-full px-3 py-1.5">
                          <span className="block w-2 h-2 rounded-full bg-accent"></span>
                          {chip.label}
                       </button>
