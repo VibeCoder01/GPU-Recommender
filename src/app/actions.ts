@@ -21,7 +21,6 @@ type LivePricingConfig = {
 
 const recommendationSchema = z.object({
   useCase: z.enum(["gaming", "creator", "ai"]),
-  resolution: z.coerce.number(),
   budget: z.coerce.number(),
   vram: z.coerce.number(),
   brand: z.enum(["any", "NVIDIA", "AMD"]),
@@ -105,7 +104,7 @@ async function fetchLiveFor(gpu: Gpu): Promise<LivePrice | null> {
 
 
 function scoreGpu(g: Gpu, values: z.infer<typeof recommendationSchema>){
-    const { useCase, resolution, vram, budget, brand } = values;
+    const { useCase, vram, budget, brand } = values;
 
     if(brand !=="any" && g.brand!==brand) return -1;
     if(g.vram_gb < vram) return -1;
@@ -118,11 +117,11 @@ function scoreGpu(g: Gpu, values: z.infer<typeof recommendationSchema>){
     why.push(`${g.vram_gb}GB VRAM`);
 
     s += Math.min(g.bus_bit/32, 12); // bandwidth proxy
-
-    const resMap: {[key: number]: number} = {1080:1,1440:2,2160:3};
+    
+    // Tier based on VRAM and bus width
     const tier = (g.vram_gb>=24?3:(g.vram_gb>=16?2:(g.vram_gb>=12?2:1))) + (g.bus_bit>=256?1:0);
-    const want = resMap[resolution];
-    if(tier>=want) { s+=10; } else { s-=5; }
+    s += tier * 2;
+
 
     if(useCase==='gaming'){
       s += Math.max(0, 6 - (g.tgp_w||200)/75);
@@ -138,7 +137,7 @@ function scoreGpu(g: Gpu, values: z.infer<typeof recommendationSchema>){
     return Math.round(s);
   }
 
-export async function getRecommendation(values: Omit<z.infer<typeof recommendationSchema>, 'resolution' | 'vram'> & { resolution: string, vram: string}, liveConfig?: LivePricingConfig) {
+export async function getRecommendation(values: Omit<z.infer<typeof recommendationSchema>, 'vram'> & { vram: string }, liveConfig?: LivePricingConfig) {
   try {
     const validatedFields = recommendationSchema.safeParse(values);
     if (!validatedFields.success) {

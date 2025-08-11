@@ -33,7 +33,6 @@ import { gpuData, sources, quickChips, LAST_CHECKED } from "@/lib/gpu-data";
 
 const formSchema = z.object({
   useCase: z.enum(["gaming", "creator", "ai"]),
-  resolution: z.enum(["1080", "1440", "2160"]),
   budget: z.coerce.number().min(100),
   vram: z.enum(["0", "8", "12", "16", "20", "24"]),
   brand: z.enum(["any", "NVIDIA", "AMD"]),
@@ -57,7 +56,6 @@ export default function Home() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       useCase: "gaming",
-      resolution: "1440",
       budget: 900,
       vram: "0",
       brand: "any",
@@ -88,14 +86,12 @@ export default function Home() {
   const handleReset = () => {
     form.reset({
       useCase: "gaming",
-      resolution: "1440",
       budget: 900,
       vram: "0",
       brand: "any",
     });
     onSubmit({
       useCase: "gaming",
-      resolution: "1440",
       budget: 900,
       vram: "0",
       brand: "any",
@@ -161,30 +157,30 @@ export default function Home() {
                 />
 
                 <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="resolution" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-xs">Target resolution</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                                <SelectContent>
-                                    <SelectItem value="1080">1080p</SelectItem>
-                                    <SelectItem value="1440">1440p</SelectItem>
-                                    <SelectItem value="2160">4K (2160p)</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </FormItem>
-                    )}/>
-                     <FormField control={form.control} name="budget" render={({ field }) => (
+                    <FormField control={form.control} name="budget" render={({ field }) => (
                         <FormItem>
                             <FormLabel className="text-xs">Budget (max, £)</FormLabel>
                             <FormControl><Input type="number" step="10" {...field} /></FormControl>
+                        </FormItem>
+                    )}/>
+                    <FormField control={form.control} name="brand" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="text-xs">Brand preference</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                <SelectContent>
+                                    <SelectItem value="any">Either / any</SelectItem>
+                                    <SelectItem value="NVIDIA">NVIDIA</SelectItem>
+                                    <SelectItem value="AMD">AMD</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </FormItem>
                     )}/>
                 </div>
                  <div className="text-xs text-muted-foreground -mt-2">We compare against a conservative “from £” price from UK listings (or your live price if enabled).</div>
 
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                     <FormField control={form.control} name="vram" render={({ field }) => (
                         <FormItem>
                             <FormLabel className="text-xs">Min VRAM (GB)</FormLabel>
@@ -197,19 +193,6 @@ export default function Home() {
                                     <SelectItem value="16">16</SelectItem>
                                     <SelectItem value="20">20</SelectItem>
                                     <SelectItem value="24">24</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </FormItem>
-                    )}/>
-                    <FormField control={form.control} name="brand" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-xs">Brand preference</FormLabel>
-                            <Select onValuechange={field.onChange} defaultValue={field.value}>
-                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                                <SelectContent>
-                                    <SelectItem value="any">Either / any</SelectItem>
-                                    <SelectItem value="NVIDIA">NVIDIA</SelectItem>
-                                    <SelectItem value="AMD">AMD</SelectItem>
                                 </SelectContent>
                             </Select>
                         </FormItem>

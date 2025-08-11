@@ -116,9 +116,9 @@ export const sources = [
 ];
 
 export const quickChips = [
-    {label:"Esports / 1080p", set:()=>({resolution: '1080', useCase: 'gaming', budget: 350})},
-    {label:"1440p high", set:()=>({resolution: '1440', useCase: 'gaming', budget: 650})},
-    {label:"4K ultra", set:()=>({resolution: '2160', useCase: 'gaming', budget: 1100})},
+    {label:"Esports / Budget", set:()=>({useCase: 'gaming', budget: 350})},
+    {label:"1440p High-End", set:()=>({useCase: 'gaming', budget: 650})},
+    {label:"4K Gaming", set:()=>({useCase: 'gaming', budget: 1100})},
     {label:"Creator (16GB+)", set:()=>({useCase: 'creator', vram: '16', budget: 800})},
     {label:"AI (CUDA, 16–24GB)", set:()=>({useCase: 'ai', brand: 'NVIDIA', vram: '16', budget: 1200})},
 ];
