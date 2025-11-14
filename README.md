@@ -1,4 +1,5 @@
-# -----     BUILT FOR THE FUN OF BUILDING - KEEP YOUR EXPECTATIONS LOW     ----- 
+# ----- BUILT FOR THE FUN OF BUILDING -----
+# -----    KEEP YOUR EXPECTATIONS LOW ----- 
 
 
 # GPU Recommender
