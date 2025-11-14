@@ -1,8 +1,7 @@
 # ----- BUILT FOR THE FUN OF BUILDING      -----
 # ----- KEEP YOUR EXPECTATIONS LOW         ----- 
-#
 # ----- ALL CODE AND PROSE IS AI GENERATED -----
-# ----- USE WITH CAUTION                   -----
+# ----- USE WITH CAUTION !!!               -----
 
 
 # GPU Recommender
