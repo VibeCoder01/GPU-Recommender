@@ -1,10 +1,10 @@
-# ----- BUILT FOR THE FUN OF BUILDING      -----
-# ----- KEEP YOUR EXPECTATIONS LOW         ----- 
-# ----- ALL CODE AND PROSE IS AI GENERATED -----
-# ----- USE WITH CAUTION !!!               -----
-#
-#
-#
+## ----- BUILT FOR THE FUN OF BUILDING      -----
+## ----- KEEP YOUR EXPECTATIONS LOW         ----- 
+## ----- ALL CODE AND PROSE IS AI GENERATED -----
+## ----- USE WITH CAUTION !!!               -----
+##
+##
+##
 # GPU Recommender
 
 This is a [Next.js](https://nextjs.org/) application built in Firebase Studio that helps users find the best Graphics Processing Unit (GPU) for their needs.
